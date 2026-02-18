@@ -9,15 +9,15 @@ const router = express.Router();
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, mandirId } = req.body;
 
-    // Validate input
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required' });
+    if (!username || !password || !mandirId) {
+      return res.status(400).json({ message: 'Mandir, Username and password are required' });
     }
 
-    // Find user
-    const user = await User.findOne({ username });
+    // Find user specifically in the selected Mandir
+    const user = await User.findOne({ username, mandir: mandirId }).populate('mandir');
+    
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -30,7 +30,12 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, username: user.username, role: user.role },
+      { 
+        id: user._id, 
+        username: user.username, 
+        role: user.role, 
+        mandirId: user.mandir._id 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -43,6 +48,7 @@ router.post('/login', async (req, res) => {
         username: user.username,
         name: user.name,
         role: user.role,
+        mandirName: user.mandir.name
       },
     });
   } catch (error) {
@@ -55,27 +61,32 @@ router.post('/login', async (req, res) => {
 router.post('/users', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { username, password, name, role } = req.body;
+    
+    // Get the Mandir ID from the logged-in admin's user record
+    const loggedInAdmin = await User.findById(req.user.id);
+    const mandirId = loggedInAdmin.mandir; 
 
     // Validate input
     if (!username || !password || !name) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ username });
+    // Check if user already exists in THIS Mandir
+    const existingUser = await User.findOne({ username, mandir: mandirId });
     if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists' });
+      return res.status(400).json({ message: 'Username already exists in this Mandir' });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create new user linked to same Mandir
     const newUser = new User({
       username,
       password: hashedPassword,
       name,
       role: role || 'staff',
+      mandir: mandirId
     });
 
     await newUser.save();
@@ -98,7 +109,9 @@ router.post('/users', authMiddleware, adminOnly, async (req, res) => {
 // Get all users (admin only)
 router.get('/users', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const loggedInAdmin = await User.findById(req.user.id);
+    // Only fetch users from the same Mandir
+    const users = await User.find({ mandir: loggedInAdmin.mandir }).select('-password');
     res.json({ users });
   } catch (error) {
     console.error('Fetch users error:', error);
@@ -109,7 +122,7 @@ router.get('/users', authMiddleware, adminOnly, async (req, res) => {
 // Get current user
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select('-password').populate('mandir');
     res.json({ user });
   } catch (error) {
     console.error('Fetch user error:', error);
