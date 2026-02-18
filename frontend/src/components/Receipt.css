@@ -1,0 +1,278 @@
+.receipt-container {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.receipt-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.print-btn,
+.close-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.print-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.print-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.close-btn {
+  background: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+}
+
+.close-btn:hover {
+  background: #e2e8f0;
+}
+
+.receipt {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 40px;
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.receipt-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-size: 120px;
+  font-weight: 900;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.receipt-watermark.received {
+  color: #48bb78;
+}
+
+.receipt-watermark.pledged {
+  color: #ed8936;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 3px double #cbd5e0;
+}
+
+.temple-logo {
+  font-size: 60px;
+  margin-bottom: 10px;
+}
+
+.receipt-header h1 {
+  color: #667eea;
+  font-size: 32px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.temple-name {
+  font-size: 20px;
+  color: #2d3748;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.temple-address {
+  color: #718096;
+  font-size: 14px;
+}
+
+.receipt-number {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f7fafc;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.receipt-number strong {
+  color: #667eea;
+  font-size: 18px;
+}
+
+.receipt-body {
+  margin-bottom: 30px;
+}
+
+.receipt-section {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f7fafc;
+  border-radius: 10px;
+}
+
+.receipt-section h3 {
+  color: #2d3748;
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  border-bottom: 2px solid #cbd5e0;
+  padding-bottom: 10px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  color: #718096;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.detail-row .value {
+  color: #2d3748;
+  text-align: right;
+  flex: 1;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.received {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.pledged {
+  background: #feebc8;
+  color: #7c2d12;
+}
+
+.receipt-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 10px;
+  font-size: 20px;
+  margin-top: 25px;
+}
+
+.receipt-amount strong {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px dashed #cbd5e0;
+}
+
+.receipt-footer p {
+  color: #4a5568;
+  margin-bottom: 8px;
+}
+
+.blessing {
+  font-style: italic;
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 20px !important;
+}
+
+.signature {
+  margin-top: 40px;
+  display: inline-block;
+}
+
+.signature-line {
+  width: 200px;
+  height: 2px;
+  background: #2d3748;
+  margin: 0 auto 10px;
+}
+
+.signature p {
+  font-size: 13px;
+  color: #718096;
+}
+
+.receipt-note {
+  margin-top: 30px;
+  padding: 15px;
+  background: #fffaf0;
+  border: 1px solid #fbd38d;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #744210;
+}
+
+.receipt-note p {
+  margin-bottom: 5px;
+}
+
+.receipt-note p:last-child {
+  margin-bottom: 0;
+}
+
+.pending-note {
+  margin-top: 10px;
+  color: #c05621;
+}
+
+@media print {
+  .receipt-container {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .receipt {
+    border: none;
+    box-shadow: none;
+  }
+
+  .receipt-watermark {
+    opacity: 0.08;
+  }
+}
