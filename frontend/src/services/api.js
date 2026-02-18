@@ -4,12 +4,9 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
-// Add token to requests
+// Request interceptor for adding auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,21 +20,25 @@ api.interceptors.request.use(
   }
 );
 
-// Auth APIs
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
-  getMe: () => api.get('/auth/me'),
-  createUser: (userData) => api.post('/auth/users', userData),
   getUsers: () => api.get('/auth/users'),
+  createUser: (userData) => api.post('/auth/users', userData),
+  getCurrentUser: () => api.get('/auth/me'),
 };
 
-// Donation APIs
 export const donationAPI = {
-  create: (donationData) => api.post('/donations', donationData),
-  getAll: (filters) => api.get('/donations', { params: filters }),
-  getById: (id) => api.get(`/donations/${id}`),
-  updateStatus: (id, status) => api.patch(`/donations/${id}`, { paymentStatus: status }),
-  getStats: () => api.get('/donations/stats/summary'),
+  createDonation: (donationData) => api.post('/donations', donationData),
+  getDonations: (params) => api.get('/donations', { params }),
+  getDonationById: (id) => api.get(`/donations/${id}`),
+  downloadReceipt: (id) => api.get(`/donations/${id}/receipt`, { responseType: 'blob' }),
+  getDashboardStats: (period) => api.get('/donations/stats', { params: { period } }),
+};
+
+// Added Mandir API
+export const mandirAPI = {
+  getList: () => api.get('/mandirs/list'),
+  register: (data) => api.post('/mandirs/register', data),
 };
 
 export default api;
