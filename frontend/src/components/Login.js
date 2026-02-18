@@ -1,16 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { mandirAPI } from '../services/api'; 
+import { Link } from 'react-router-dom'; 
 import toast from 'react-hot-toast';
 import { LogIn } from 'lucide-react';
 import './Login.css';
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [credentials, setCredentials] = useState({ username: '', password: '', mandirId: '' });
+  const [mandirs, setMandirs] = useState([]);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
+  useEffect(() => {
+    const fetchMandirs = async () => {
+      try {
+        const response = await mandirAPI.getList();
+        setMandirs(response.data);
+        if (response.data.length > 0) {
+           setCredentials(prev => ({ ...prev, mandirId: response.data[0]._id }));
+        }
+      } catch (error) {
+        toast.error('Failed to load Mandir list');
+      }
+    };
+    fetchMandirs();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!credentials.mandirId) {
+        return toast.error('Please select a Mandir');
+    }
     setLoading(true);
 
     try {
@@ -34,11 +55,27 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
+            <label htmlFor="mandir">Select Mandir</label>
+            <select
+              id="mandir"
+              value={credentials.mandirId}
+              onChange={(e) => setCredentials({ ...credentials, mandirId: e.target.value })}
+              required
+              className="form-select" 
+              style={{width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px', marginBottom: '1rem'}}
+            >
+              <option value="">-- Select Your Mandir --</option>
+              {mandirs.map(m => (
+                <option key={m._id} value={m._id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
-              data-testid="login-username-input"
               value={credentials.username}
               onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
               placeholder="Enter your username"
@@ -51,7 +88,6 @@ const Login = () => {
             <input
               type="password"
               id="password"
-              data-testid="login-password-input"
               value={credentials.password}
               onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
               placeholder="Enter your password"
@@ -63,21 +99,15 @@ const Login = () => {
             type="submit" 
             className="login-button" 
             disabled={loading}
-            data-testid="login-submit-button"
           >
-            {loading ? (
-              'Logging in...'
-            ) : (
-              <>
-                <LogIn size={20} />
-                Login
-              </>
-            )}
+            {loading ? 'Logging in...' : <><LogIn size={20} /> Login</>}
           </button>
         </form>
 
         <div className="login-footer">
-          <p className="default-creds">Default Admin: shobhit / W0rk@0990</p>
+           <p style={{marginTop: '1rem'}}>
+             New Temple? <Link to="/register-mandir" style={{color: '#e53e3e', fontWeight: 'bold'}}>Register here</Link>
+           </p>
         </div>
       </div>
     </div>
