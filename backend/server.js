@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
 const donationRoutes = require('./routes/donations');
+const mandirRoutes = require('./routes/mandir'); // Added
 const { scheduleReminderCheck } = require('./utils/cronJobs');
 const { initializeTwilio } = require('./utils/smsService');
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);
+app.use('/api/mandirs', mandirRoutes); // Added
 
 // Health check
 app.get('/api/health', (req, res) => {
