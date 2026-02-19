@@ -261,15 +261,33 @@
   color: #c05621;
 }
 
+/* --- FIXED PRINT STYLES --- */
 @media print {
-  .receipt-container {
-    box-shadow: none;
-    padding: 0;
+  /* Hide all generic body content */
+  body * {
+    visibility: hidden;
   }
 
+  /* Target the receipt specifically and force it to show */
+  .receipt, .receipt * {
+    visibility: visible;
+  }
+
+  /* Anchor it to the top left of the printed page */
   .receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     border: none;
     box-shadow: none;
+  }
+
+  /* Force hide dashboard menus, sidebars, and buttons */
+  .no-print, .dashboard-nav, .dashboard-nav * {
+    display: none !important;
   }
 
   .receipt-watermark {

@@ -6,6 +6,7 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+// Request interceptor for adding auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -28,10 +29,10 @@ export const authAPI = {
 
 export const donationAPI = {
   createDonation: (donationData) => api.post('/donations', donationData),
-  getDonations: (params) => api.get('/donations', { params }),
-  getDonationById: (id) => api.get(`/donations/${id}`),
-  downloadReceipt: (id) => api.get(`/donations/${id}/receipt`, { responseType: 'blob' }),
-  getDashboardStats: (period) => api.get('/donations/stats/summary', { params: { period } }), // Fixed endpoint
+  getAll: (params) => api.get('/donations', { params }), // Used by DonationList.js
+  getById: (id) => api.get(`/donations/${id}`),
+  updateStatus: (id, paymentStatus) => api.patch(`/donations/${id}`, { paymentStatus }),
+  getStats: () => api.get('/donations/stats/summary'), // Used by Dashboard.js
 };
 
 export const mandirAPI = {

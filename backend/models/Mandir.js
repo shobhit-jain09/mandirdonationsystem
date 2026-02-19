@@ -22,6 +22,8 @@ const mandirSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   }
+}, { 
+  collection: 'mandirs' // EXPLICITLY telling Mongoose to use the 'mandirs' collection 
 });
 
 module.exports = mongoose.model('Mandir', mandirSchema);

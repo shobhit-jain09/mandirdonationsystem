@@ -1,8 +1,11 @@
 import React from 'react';
 import { Printer, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Receipt.css';
 
 const Receipt = ({ donation, onClose }) => {
+  const { user } = useAuth(); // Access current user's Mandir info
+
   const handlePrint = () => {
     window.print();
   };
@@ -43,8 +46,8 @@ const Receipt = ({ donation, onClose }) => {
         <div className="receipt-header">
           <div className="temple-logo">🕉️</div>
           <h1>Mandir Donation Receipt</h1>
-          <p className="temple-name">Sri Mandir Trust</p>
-          <p className="temple-address">Temple Address Line 1, City, State - PIN</p>
+          <p className="temple-name">{user?.mandirName || 'Sri Mandir Trust'}</p>
+          <p className="temple-address">Official Donation Receipt</p>
         </div>
 
         <div className="receipt-number">
