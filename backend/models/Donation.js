@@ -28,7 +28,7 @@ const donationSchema = new mongoose.Schema({
   donationType: {
     type: String,
     required: true,
-    enum: ['Go Sanrakshan Daan', 'Mandir Nirman', 'Mandir Sanrakshan'],
+    enum: ['Go Sanrakshan Daan', 'Mandir Nirman', 'Mandir Sanrakshan', 'General'],
   },
   paymentStatus: {
     type: String,
@@ -38,14 +38,12 @@ const donationSchema = new mongoose.Schema({
   },
   receiptNumber: {
     type: String,
-    unique: true,
   },
-  remindersSent: {
-    type: Number,
-    default: 0,
-  },
-  lastReminderDate: {
-    type: Date,
+  // ADDED: Link donation to a specific Mandir
+  mandir: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Mandir',
+    required: true,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -61,11 +59,16 @@ const donationSchema = new mongoose.Schema({
   },
 });
 
+// Compound index: Receipt numbers should be unique PER MANDIR
+donationSchema.index({ receiptNumber: 1, mandir: 1 }, { unique: true });
+
 // Generate receipt number before saving
 donationSchema.pre('save', async function (next) {
   if (!this.receiptNumber) {
-    const count = await mongoose.model('Donation').countDocuments();
+    // Count donations ONLY for this specific Mandir
+    const count = await mongoose.model('Donation').countDocuments({ mandir: this.mandir });
     const year = new Date().getFullYear();
+    // Format: RCP-2024-000001
     this.receiptNumber = `RCP${year}${String(count + 1).padStart(6, '0')}`;
   }
   this.updatedAt = Date.now();

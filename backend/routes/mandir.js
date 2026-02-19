@@ -1,10 +1,8 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const Mandir = require('../models/Mandir');
-const User = require('../models/User');
 const router = express.Router();
 
-// Get list of all Mandirs (for Login Dropdown)
+// Get list of all Mandirs
 router.get('/list', async (req, res) => {
   try {
     const mandirs = await Mandir.find().select('name _id');
@@ -14,40 +12,22 @@ router.get('/list', async (req, res) => {
   }
 });
 
-// Register new Mandir + First Admin User
+// Register new Mandir ONLY (No User Creation)
 router.post('/register', async (req, res) => {
   try {
-    const { 
-      mandirName, 
-      phoneNumber, 
-      contactPerson, 
-      username, 
-      password 
-    } = req.body;
+    const { mandirName, phoneNumber, contactPerson } = req.body;
 
-    if (!mandirName || !username || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!mandirName || !phoneNumber) {
+      return res.status(400).json({ message: 'Mandir Name and Phone are required' });
     }
 
-    // 1. Create Mandir
     const newMandir = new Mandir({
       name: mandirName,
       phoneNumber,
       contactPerson
     });
-    const savedMandir = await newMandir.save();
 
-    // 2. Create Admin User for this Mandir
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username,
-      password: hashedPassword,
-      name: contactPerson,
-      role: 'admin',
-      mandir: savedMandir._id
-    });
-    
-    await newUser.save();
+    const savedMandir = await newMandir.save();
 
     res.status(201).json({ 
       message: 'Mandir registered successfully', 
@@ -56,9 +36,6 @@ router.post('/register', async (req, res) => {
 
   } catch (error) {
     console.error('Registration error:', error);
-    if (error.code === 11000) {
-        return res.status(400).json({ message: 'Username already exists for this Mandir' });
-    }
     res.status(500).json({ message: 'Server error' });
   }
 });

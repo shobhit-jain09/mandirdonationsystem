@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { authAPI } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { authAPI, mandirAPI } from '../services/api'; // Import mandirAPI
 import toast from 'react-hot-toast';
 import { UserPlus, X } from 'lucide-react';
 import './UserManagement.css';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [mandirs, setMandirs] = useState([]); // Store mandirs list
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -13,10 +14,12 @@ const UserManagement = () => {
     password: '',
     name: '',
     role: 'staff',
+    mandirId: '' // Add mandirId
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchUsers();
+    fetchMandirs();
   }, []);
 
   const fetchUsers = async () => {
@@ -25,6 +28,19 @@ const UserManagement = () => {
       setUsers(response.data.users);
     } catch (error) {
       toast.error('Failed to fetch users');
+    }
+  };
+
+  const fetchMandirs = async () => {
+    try {
+      const response = await mandirAPI.getList();
+      setMandirs(response.data);
+      // Auto-select first mandir if available
+      if(response.data.length > 0) {
+        setFormData(prev => ({ ...prev, mandirId: response.data[0]._id }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch mandirs');
     }
   };
 
@@ -41,6 +57,7 @@ const UserManagement = () => {
         password: '',
         name: '',
         role: 'staff',
+        mandirId: mandirs.length > 0 ? mandirs[0]._id : ''
       });
       fetchUsers();
     } catch (error) {
@@ -60,7 +77,6 @@ const UserManagement = () => {
         <button 
           onClick={() => setShowForm(!showForm)} 
           className="add-user-btn"
-          data-testid="add-user-button"
         >
           {showForm ? <X size={20} /> : <UserPlus size={20} />}
           {showForm ? 'Cancel' : 'Add User'}
@@ -71,16 +87,32 @@ const UserManagement = () => {
         <div className="user-form-card">
           <h3>Create New User</h3>
           <form onSubmit={handleSubmit} className="user-form">
+            
+            {/* Added Mandir Selection */}
+            <div className="form-group" style={{marginBottom: '1rem'}}>
+               <label htmlFor="mandirSelect">Select Mandir *</label>
+               <select
+                 id="mandirSelect"
+                 value={formData.mandirId}
+                 onChange={(e) => setFormData({...formData, mandirId: e.target.value})}
+                 required
+                 style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}}
+               >
+                 <option value="">-- Select Mandir --</option>
+                 {mandirs.map(m => (
+                   <option key={m._id} value={m._id}>{m.name}</option>
+                 ))}
+               </select>
+            </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="name">Full Name *</label>
                 <input
                   type="text"
                   id="name"
-                  data-testid="user-name-input"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter full name"
                   required
                 />
               </div>
@@ -90,10 +122,8 @@ const UserManagement = () => {
                 <input
                   type="text"
                   id="username"
-                  data-testid="user-username-input"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  placeholder="Enter username"
                   required
                 />
               </div>
@@ -105,10 +135,8 @@ const UserManagement = () => {
                 <input
                   type="password"
                   id="password"
-                  data-testid="user-password-input"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Enter password"
                   required
                 />
               </div>
@@ -117,7 +145,6 @@ const UserManagement = () => {
                 <label htmlFor="role">Role *</label>
                 <select
                   id="role"
-                  data-testid="user-role-select"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   required
@@ -128,12 +155,7 @@ const UserManagement = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className="create-user-btn" 
-              disabled={loading}
-              data-testid="create-user-submit"
-            >
+            <button type="submit" className="create-user-btn" disabled={loading}>
               {loading ? 'Creating...' : 'Create User'}
             </button>
           </form>
@@ -144,13 +166,16 @@ const UserManagement = () => {
         <h3>All Users ({users.length})</h3>
         <div className="users-grid">
           {users.map((user) => (
-            <div key={user._id} className="user-card" data-testid="user-card">
+            <div key={user._id} className="user-card">
               <div className="user-avatar">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="user-info">
                 <h4>{user.name}</h4>
                 <p className="username">@{user.username}</p>
+                {/* Display Mandir Name */}
+                <p style={{fontSize: '0.85rem', color: '#666'}}>🛕 {user.mandir?.name || 'Unknown Mandir'}</p>
+                
                 <span className={`role-badge ${user.role}`}>
                   {user.role === 'admin' ? '🔑 Admin' : '👥 Staff'}
                 </span>

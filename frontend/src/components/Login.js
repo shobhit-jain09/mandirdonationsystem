@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { mandirAPI } from '../services/api'; 
-import { Link } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import toast from 'react-hot-toast';
 import { LogIn } from 'lucide-react';
 import './Login.css';
 
 const Login = () => {
+  const navigate = useNavigate(); // 2. Initialize navigate hook
   const [credentials, setCredentials] = useState({ username: '', password: '', mandirId: '' });
   const [mandirs, setMandirs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth(); // Get auth state
+
+  // Optional: Redirect if user is already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     const fetchMandirs = async () => {
@@ -37,6 +45,7 @@ const Login = () => {
     try {
       await login(credentials);
       toast.success('Login successful!');
+      navigate('/'); // 3. Redirect to Dashboard on success
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {
