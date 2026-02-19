@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { mandirAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
-import './Login.css'; // Reusing Login CSS
+import './Login.css'; 
 
 const MandirRegistration = () => {
   const navigate = useNavigate();
@@ -10,9 +10,9 @@ const MandirRegistration = () => {
   const [formData, setFormData] = useState({
     mandirName: '',
     phoneNumber: '',
+    email: '', // NEW: State for email
     contactPerson: '',
-    username: '', 
-    password: ''
+    address: '' 
   });
 
   const handleSubmit = async (e) => {
@@ -20,7 +20,7 @@ const MandirRegistration = () => {
     setLoading(true);
     try {
       await mandirAPI.register(formData);
-      toast.success('Mandir registered successfully! Please login.');
+      toast.success('Mandir registered successfully!');
       navigate('/login');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
@@ -34,7 +34,7 @@ const MandirRegistration = () => {
       <div className="login-card" style={{ maxWidth: '500px' }}>
         <div className="login-header">
           <h1>Register New Mandir</h1>
-          <p>Create your Temple Management Account</p>
+          <p>Create your Temple Profile</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
@@ -60,6 +60,17 @@ const MandirRegistration = () => {
             />
           </div>
 
+          {/* NEW: Email Input Field */}
+          <div className="form-group">
+            <label>Email ID (Optional)</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              placeholder="contact@mandir.com"
+            />
+          </div>
+
           <div className="form-group">
             <label>Contact Person Name *</label>
             <input
@@ -71,36 +82,25 @@ const MandirRegistration = () => {
             />
           </div>
 
-          <hr style={{margin: '20px 0', border: '0', borderTop: '1px solid #eee'}} />
-          <p style={{marginBottom: '15px', fontWeight: 'bold', textAlign: 'center'}}>Admin Account Details</p>
-
           <div className="form-group">
-            <label>Admin Username *</label>
-            <input
-              type="text"
+            <label>Complete Address *</label>
+            <textarea
               required
-              value={formData.username}
-              onChange={(e) => setFormData({...formData, username: e.target.value})}
+              value={formData.address}
+              onChange={(e) => setFormData({...formData, address: e.target.value})}
+              placeholder="Enter full temple address"
+              rows="3"
+              style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px', marginTop: '4px' }}
             />
           </div>
 
-          <div className="form-group">
-            <label>Password *</label>
-            <input
-              type="password"
-              required
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />
-          </div>
-
-          <button type="submit" className="login-button" disabled={loading}>
+          <button type="submit" className="login-button" disabled={loading} style={{marginTop: '20px'}}>
             {loading ? 'Registering...' : 'Register Mandir'}
           </button>
         </form>
         
         <div className="login-footer">
-          <Link to="/login">Already have an account? Login here</Link>
+          <Link to="/login">Back to Login</Link>
         </div>
       </div>
     </div>

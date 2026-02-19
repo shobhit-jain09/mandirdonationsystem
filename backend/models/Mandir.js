@@ -10,6 +10,11 @@ const mandirSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String, // NEW: Added email field
+    trim: true,
+    lowercase: true,
+  },
   contactPerson: {
     type: String,
     required: true,
@@ -23,7 +28,7 @@ const mandirSchema = new mongoose.Schema({
     default: Date.now,
   }
 }, { 
-  collection: 'mandirs' // EXPLICITLY telling Mongoose to use the 'mandirs' collection 
+  collection: 'mandirs'
 });
 
 module.exports = mongoose.model('Mandir', mandirSchema);

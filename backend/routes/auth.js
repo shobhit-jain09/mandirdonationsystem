@@ -6,7 +6,7 @@ const { authMiddleware, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Login (Unchanged)
+// Login
 router.post('/login', async (req, res) => {
   try {
     const { username, password, mandirId } = req.body;
@@ -33,13 +33,13 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Create User - Allows selecting Mandir
+// Create User - Strictly restricted to logged-in Admin's Mandir
 router.post('/users', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { username, password, name, role, mandirId } = req.body; // Accept mandirId
+    const { username, password, name, role } = req.body; 
 
-    // Use provided mandirId OR fallback to logged-in admin's mandir
-    const targetMandirId = mandirId || req.user.mandirId;
+    // FORCE security: The new user is strictly locked to the admin's Mandir
+    const targetMandirId = req.user.mandirId;
 
     if (!username || !password || !name) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -47,7 +47,7 @@ router.post('/users', authMiddleware, adminOnly, async (req, res) => {
 
     const existingUser = await User.findOne({ username, mandir: targetMandirId });
     if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists in this Mandir' });
+      return res.status(400).json({ message: 'Username already exists in your Mandir' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -56,7 +56,7 @@ router.post('/users', authMiddleware, adminOnly, async (req, res) => {
       password: hashedPassword,
       name,
       role: role || 'staff',
-      mandir: targetMandirId 
+      mandir: targetMandirId // Saved securely
     });
 
     await newUser.save();
@@ -67,14 +67,12 @@ router.post('/users', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
-// Get Users - Populate Mandir Name
+// Get Users - Strictly restricted to logged-in Admin's Mandir
 router.get('/users', authMiddleware, adminOnly, async (req, res) => {
   try {
-    // Note: If you want to see ALL users across ALL mandirs, remove the filter. 
-    // Currently, it shows users for the logged-in admin's Mandir.
+    // SECURITY: Only find users belonging to the admin's Mandir
     const users = await User.find({ mandir: req.user.mandirId })
-      .select('-password')
-      .populate('mandir', 'name'); // Add Mandir name
+      .select('-password'); 
       
     res.json({ users });
   } catch (error) {
@@ -82,7 +80,7 @@ router.get('/users', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
-// Get Me (Unchanged)
+// Get Me
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password').populate('mandir');

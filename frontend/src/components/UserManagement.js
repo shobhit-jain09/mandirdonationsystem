@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { authAPI, mandirAPI } from '../services/api'; // Import mandirAPI
+import { authAPI } from '../services/api'; 
+import { useAuth } from '../context/AuthContext'; // Added to get current admin's mandir
 import toast from 'react-hot-toast';
 import { UserPlus, X } from 'lucide-react';
 import './UserManagement.css';
 
 const UserManagement = () => {
+  const { user } = useAuth(); // Get logged-in admin details
   const [users, setUsers] = useState([]);
-  const [mandirs, setMandirs] = useState([]); // Store mandirs list
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -14,12 +15,10 @@ const UserManagement = () => {
     password: '',
     name: '',
     role: 'staff',
-    mandirId: '' // Add mandirId
   });
 
   useEffect(() => {
     fetchUsers();
-    fetchMandirs();
   }, []);
 
   const fetchUsers = async () => {
@@ -28,19 +27,6 @@ const UserManagement = () => {
       setUsers(response.data.users);
     } catch (error) {
       toast.error('Failed to fetch users');
-    }
-  };
-
-  const fetchMandirs = async () => {
-    try {
-      const response = await mandirAPI.getList();
-      setMandirs(response.data);
-      // Auto-select first mandir if available
-      if(response.data.length > 0) {
-        setFormData(prev => ({ ...prev, mandirId: response.data[0]._id }));
-      }
-    } catch (error) {
-      console.error('Failed to fetch mandirs');
     }
   };
 
@@ -57,7 +43,6 @@ const UserManagement = () => {
         password: '',
         name: '',
         role: 'staff',
-        mandirId: mandirs.length > 0 ? mandirs[0]._id : ''
       });
       fetchUsers();
     } catch (error) {
@@ -72,7 +57,7 @@ const UserManagement = () => {
       <div className="management-header">
         <div>
           <h2>User Management</h2>
-          <p>Manage staff and admin users</p>
+          <p>Manage staff for <strong>{user?.mandirName}</strong></p>
         </div>
         <button 
           onClick={() => setShowForm(!showForm)} 
@@ -85,26 +70,9 @@ const UserManagement = () => {
 
       {showForm && (
         <div className="user-form-card">
-          <h3>Create New User</h3>
+          <h3>Create New User for {user?.mandirName}</h3>
           <form onSubmit={handleSubmit} className="user-form">
             
-            {/* Added Mandir Selection */}
-            <div className="form-group" style={{marginBottom: '1rem'}}>
-               <label htmlFor="mandirSelect">Select Mandir *</label>
-               <select
-                 id="mandirSelect"
-                 value={formData.mandirId}
-                 onChange={(e) => setFormData({...formData, mandirId: e.target.value})}
-                 required
-                 style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}}
-               >
-                 <option value="">-- Select Mandir --</option>
-                 {mandirs.map(m => (
-                   <option key={m._id} value={m._id}>{m.name}</option>
-                 ))}
-               </select>
-            </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="name">Full Name *</label>
@@ -163,21 +131,18 @@ const UserManagement = () => {
       )}
 
       <div className="users-list">
-        <h3>All Users ({users.length})</h3>
+        <h3>Staff Members ({users.length})</h3>
         <div className="users-grid">
-          {users.map((user) => (
-            <div key={user._id} className="user-card">
+          {users.map((staffMember) => (
+            <div key={staffMember._id} className="user-card">
               <div className="user-avatar">
-                {user.name.charAt(0).toUpperCase()}
+                {staffMember.name.charAt(0).toUpperCase()}
               </div>
               <div className="user-info">
-                <h4>{user.name}</h4>
-                <p className="username">@{user.username}</p>
-                {/* Display Mandir Name */}
-                <p style={{fontSize: '0.85rem', color: '#666'}}>🛕 {user.mandir?.name || 'Unknown Mandir'}</p>
-                
-                <span className={`role-badge ${user.role}`}>
-                  {user.role === 'admin' ? '🔑 Admin' : '👥 Staff'}
+                <h4>{staffMember.name}</h4>
+                <p className="username">@{staffMember.username}</p>
+                <span className={`role-badge ${staffMember.role}`}>
+                  {staffMember.role === 'admin' ? '🔑 Admin' : '👥 Staff'}
                 </span>
               </div>
             </div>
